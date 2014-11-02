@@ -1,0 +1,215 @@
+/* Body and Layout Div Styles */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+#patterns {
+    position: fixed;
+    height: 100%;
+    width: 260px;
+    left: 0;
+    top: 0;
+    border-right: 1px solid rgb(200, 200, 200);
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+#controls {
+    position: fixed;
+    height: 100%;
+    width: 260px;
+    right: 0;
+    top: 0;
+    border-left: 1px solid rgb(200, 200, 200);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#patterns, #controls {
+    background: rgb(230, 230, 230);
+}
+
+#canvasContainer {
+    margin: 0 auto;
+    margin-top: 30px;
+}
+
+#welcome {
+    width: 500px;
+    padding: 7px;
+    background: rgb(240, 240, 240);
+    margin: 0 auto;
+    margin-top: 40px;
+    border: 2px solid grey;
+    text-align: center;
+    font-size: 90%;
+}
+
+
+canvas {
+    display:block;
+    margin: 0 auto;
+    -webkit-box-shadow: 0px 0px 10px 0px rgba(50, 50, 50, 0.75);
+    -moz-box-shadow:    0px 0px 10px 0px rgba(50, 50, 50, 0.75);
+    box-shadow:         0px 0px 10px 0px rgba(50, 50, 50, 0.75);
+}
+
+/* Pattern Display Div */
+
+#welcome a {
+    color: rgb(240,52,72);
+}
+
+.pattern {
+    border-bottom: 1px solid rgb(200, 200, 200);
+    text-align: right;
+    font-size: 70%;
+    padding: 3px;
+}
+.pattern:hover {
+    background: rgb(255, 210, 210);
+}
+
+.pattern_image {
+    height: 40px;
+}
+.pattern_image:hover {
+    cursor: pointer;
+}
+
+.authorlink {
+    color: rgb(240,52,72);
+    text-align: right;
+}
+.authorlink:hover {
+    text-decoration: none;
+}
+
+.pattern_selected {
+    background: rgb(160, 160, 160);
+}
+
+.code {
+    background: rgb(90, 90, 90);
+}
+
+.artlink {
+    background: rgb(160, 160, 160);
+    padding: 4px 0px;
+    display: block;
+    text-align: center;
+    color: white;
+}
+
+p {
+    background: white;
+    text-align: left;
+    width: 230px;
+    display: block;
+    margin: 0 auto;
+    font-size: 100%;
+    font-family: Courier New, monospace;
+    overflow-x: auto;
+}
+
+h3 {
+    margin: 0 auto;
+    padding: 3px;
+    text-align: left;
+    font-size: 120%;
+    font-weight: bold;
+    color: white;
+}
+
+.constant {
+    color: rgb(240,52,72);
+}
+
+
+/* Parameter Controls */
+
+.param {
+    text-align: center;
+}
+
+.paramshelp {
+    width: 240px;
+    padding: 5px 10px;
+    background: rgb(240, 240, 240);
+    margin: 0 auto;
+    text-align: center;
+    font-size: 70%;
+}
+
+.paramname {
+    font-weight: bold;
+    color: rgb(240,52,72);
+}
+
+.paramspinner {
+    display: block;
+    margin: 0 auto;
+}
+
+.sliderlabel, .routeLabel {
+    padding: 4px;
+    font-size: 70%;
+    width: 100%;
+    display: inline-block;
+}
+
+.slider {
+    margin-left: 12px;
+    margin-right: 12px;
+    margin-bottom: 4px;
+}
+
+.selectcontainer {
+    font-size: 12px;
+}
+
+select {
+    display: block;
+    width: 260px;
+}
+
+
+/* Main Controls */
+
+#maincontrols {
+    width: 512px;
+    margin: 0 auto;
+    margin-top: 30px;
+    text-align: center;
+}
+
+.controlButton {
+    padding: 5px;
+    background: rgb(240, 240, 240);
+    display: inline-block;
+    border-radius: 5px;
+    -webkit-box-shadow: 0px 2px 0px 0px rgba(50, 50, 50, 0.5);
+    -moz-box-shadow:    0px 2px 0px 0px rgba(50, 50, 50, 0.5);
+    box-shadow:         0px 2px 0px 0px rgba(50, 50, 50, 0.5);
+}
+
+.controlButton.on {
+    background: rgb(150, 150, 150);
+}
+
+.buttonLabel {
+    font-weight: bold;
+    display: inline-block; 
+}
+
+.controlButton:hover {
+    cursor: pointer;
+    background: rgb(150, 150, 150);
+}
+
+.controlButton.on:hover {
+    background: rgb(240, 240, 240);
+}

@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+    <head>
+        <title>JS Tweetable Mathematical Art</title>
+        <link rel="stylesheet" href="jquery-ui.css" />
+        <link rel="stylesheet" href="style.css" />
+        <script src="lib/jquery.min.js"></script>
+        <script src="lib/jquery-ui.min.js"></script>
+        <script src="lib/FileSaver.min.js"></script>
+        <script src="lib/canvas-toBlob.js"></script>
+        <script src="lib/handlebars-v2.0.0.js"></script>
+    </head>
+    <body>
+        <div id="patterns">
+            
+        </div>
+        <div id="welcome">
+            This is an interactive viewer for some of the <a href="http://codegolf.stackexchange.com/questions/35569/tweetable-mathematical-art">Tweetable Mathematical Art</a> posted in the thread in the StackExchange <a href="http://codegolf.stackexchange.com/">Code Golf</a> community. Select a pattern at the left to begin.
+        </div>
+        <div id="canvasContainer">
+            It looks like your browser has Javascript disabled. Please enable Javascript to view this demo!
+        </div>
+        <div id="controls">
+            <div class="paramshelp">
+                Adjust which of the three color functions will be used for each channel:
+            </div>
+            <div class="rgbRoute">
+                <div class="ui-state-default ui-corner-all ui-helper-clearfix routeLabel">Red:</div>
+                <div class="selectcontainer">
+                <select name="red" id="route_red">
+                    <option value="red" selected="selected">Red</option>
+                    <option value="green">Green</option>
+                    <option value="blue">Blue</option>
+                </select>
+                </div>
+                <div class="ui-state-default ui-corner-all ui-helper-clearfix routeLabel">Green:</div>
+                <div class="selectcontainer">
+                <select name="green" id="route_green">
+                    <option value="red">Red</option>
+                    <option value="green" selected="selected">Green</option>
+                    <option value="blue">Blue</option>
+                </select>
+                </div>
+                <div class="ui-state-default ui-corner-all ui-helper-clearfix routeLabel">Blue:</div>
+                <div class="selectcontainer">
+                <select name="blue" id="route_blue">
+                    <option value="red">Red</option>
+                    <option value="green">Green</option>
+                    <option value="blue" selected="selected">Blue</option>
+                </select>
+                </div>
+            </div>
+            <div class="paramshelp">
+                Adjust each of the function constants here. Refer to the function code if it helps! Feel free to use the arrows or type in a value to go beyond where the slider will let you go - the slider will automatically adjust.
+            </div>
+        </div>
+        <script id="art-template" type="text/x-handlebars-template">
+            <div class="pattern">
+                <div class="pattern_image" style="background: url({{image}});"></div>
+                author: <a class="authorlink" href="{{authorlink}}">{{{author}}}</a>
+                <div class="code">
+                <a class="artlink" href="{{artlink}}">View on StackOverflow</a>
+                <h3>Red:</h3>
+                <p>{{{code_red}}}</p>
+                <h3>Green:</h3>
+                <p>{{{code_green}}}</p>
+                <h3>Blue:</h3>
+                <p>{{{code_blue}}}</p>
+                </div>
+            </div>
+        </script>
+        <script id="param-template" type="text/x-handlebars-template">
+            <div class="param">
+                <div class="ui-state-default ui-corner-all ui-helper-clearfix sliderlabel">Adjust <span class="paramname">{{name}}</span></div>
+                <input class="paramspinner" name="value">
+                <div class="slider"></div>
+            </div>
+        </script>
+        <script id="maincontrols-template" type="text/x-handlebars-template">
+            <div id="maincontrols">
+            <div class="buttonLabel">
+                Adjust Size:
+            </div>
+            <div class="controlButton" id="resize256">
+                256px
+            </div>
+            <div class="controlButton" id="resize512">
+                512px
+            </div>
+            <div class="controlButton" id="resize1024">
+                1024px
+            </div>
+            <div class="buttonLabel">
+                Save Image:
+            </div>
+            <div class="controlButton" id="export">
+                Export PNG
+            </div>
+            <div class="buttonLabel">
+                Toggle image updating as you slide:
+            </div>
+            <div class="controlButton" id="UWSbutton">
+                Update While Sliding
+            </div>
+        </script>
+        <script src="arts.js"></script>
+        <script src="script.js"></script>
+    </body>
+</html>
