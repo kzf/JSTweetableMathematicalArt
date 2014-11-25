@@ -1,3 +1,9 @@
+
+/**********************************
+ * ART DEFINITIONS
+ *
+ **********************************/
+
 /* Helper functions */
 var sq = function(x) { return x*x; }
 var cb = function(x) { return Math.abs(x*x*x); }
@@ -37,7 +43,7 @@ function nthroot(x, n) {
 
 var arts = [
     { author: "user1455003",
-      image: "images/user1455003.png",
+      image: "assets/images/user1455003.png",
       artlink: "http://codegolf.stackexchange.com/a/35595",
       authorlink: "http://codegolf.stackexchange.com/users/8055/user1455003",
       f: {
@@ -50,7 +56,7 @@ var arts = [
         }
     },
     { author: "Kyle McCormick",
-      image: "images/kylemccormick_1.png",
+      image: "assets/images/kylemccormick_1.png",
       artlink: "http://codegolf.stackexchange.com/q/35569",
       authorlink: "http://codegolf.stackexchange.com/users/26926/kyle-mccormick",
       f: {
@@ -65,7 +71,7 @@ var arts = [
         }
     },
     { author: "Kyle McCormick",
-      image: "images/kylemccormick_2.png",
+      image: "assets/images/kylemccormick_2.png",
       artlink: "http://codegolf.stackexchange.com/q/35569",
       authorlink: "http://codegolf.stackexchange.com/users/26926/kyle-mccormick",
       f: {
@@ -76,7 +82,7 @@ var arts = [
         }
     },
     { author: "githubphagocyte",
-      image: "images/githubphagocyte_1.png",
+      image: "assets/images/githubphagocyte_1.png",
       artlink: "http://codegolf.stackexchange.com/a/35641",
       authorlink: "http://codegolf.stackexchange.com/users/20283/githubphagocyte",
       f: {
@@ -96,7 +102,7 @@ var arts = [
         }
     },
     { author: "githubphagocyte",
-      image: "images/githubphagocyte_2.png",
+      image: "assets/images/githubphagocyte_2.png",
       artlink: "http://codegolf.stackexchange.com/a/35641",
       authorlink: "http://codegolf.stackexchange.com/users/20283/githubphagocyte",
       f: {
@@ -123,7 +129,7 @@ var arts = [
         }
     },
     { author: "githubphagocyte",
-      image: "images/githubphagocyte_3.png",
+      image: "assets/images/githubphagocyte_3.png",
       artlink: "http://codegolf.stackexchange.com/a/35641",
       authorlink: "http://codegolf.stackexchange.com/users/20283/githubphagocyte",
       f: {
@@ -152,7 +158,7 @@ var arts = [
         }
     },
     { author: "cjfaure",
-      image: "images/cjfaure.png",
+      image: "assets/images/cjfaure.png",
       artlink: "http://codegolf.stackexchange.com/a/35689",
       authorlink: "http://codegolf.stackexchange.com/users/13702/cjfaure",
       f: {
@@ -178,7 +184,7 @@ var arts = [
         }
     },
     { author: "faubiguy",
-      image: "images/faubiguy.png",
+      image: "assets/images/faubiguy.png",
       artlink: "http://codegolf.stackexchange.com/a/35596",
       authorlink: "http://codegolf.stackexchange.com/users/29990/faubiguy",
       f: {
@@ -206,7 +212,7 @@ var arts = [
         }
     },
     { author: "Martin B&#252;ttner",
-      image: "images/martinbuttner.png",
+      image: "assets/images/martinbuttner.png",
       artlink: "http://codegolf.stackexchange.com/a/35601",
       authorlink: "http://codegolf.stackexchange.com/users/8478/martin-b%c3%bcttner",
       f: {
@@ -236,7 +242,7 @@ var arts = [
         }
     },
     { author: "teh internets is made of catz",
-      image: "images/teh-internets-is-made-of-catz.png",
+      image: "assets/images/teh-internets-is-made-of-catz.png",
       artlink: "http://codegolf.stackexchange.com/a/35674",
       authorlink: "http://codegolf.stackexchange.com/users/11744/teh-internets-is-made-of-catz",
       f: {
@@ -266,7 +272,7 @@ var arts = [
         }
     },
     { author: "Manuel Kasten",
-      image: "images/manuelkasten.png",
+      image: "assets/images/manuelkasten.png",
       artlink: "http://codegolf.stackexchange.com/a/35739",
       authorlink: "http://codegolf.stackexchange.com/users/30166/manuel-kasten",
       f: {
@@ -293,7 +299,7 @@ var arts = [
         }
     },
     { author: "Manuel Kasten",
-      image: "images/manuelkasten_2.png",
+      image: "assets/images/manuelkasten_2.png",
       artlink: "http://codegolf.stackexchange.com/a/35744",
       authorlink: "http://codegolf.stackexchange.com/users/30166/manuel-kasten",
       f: {
@@ -313,3 +319,76 @@ var arts = [
         }
     }
 ]
+
+
+
+/**********************************
+ * WORKER
+ *
+ **********************************/
+
+var updateCanvas = function(data, f, canvas_size) {
+    var step = 1024/canvas_size;
+    var i = 0;
+    for (var y = 0; y < 1024; y += step) {
+        for (var x = 0; x < 1024; x += step) {
+            data[i++] = f.red(x, y) >> 2;
+            data[i++] = f.green(x, y) >> 2;
+            data[i++] = f.blue(x, y) >> 2;
+            data[i++] = 255; // alpha
+        }
+        postMessage({
+            type: "progress",
+            percent: y/1024
+        });
+    }
+}
+
+addEventListener("message", function(e) {
+    if (e.data.type === 'job') {
+        var imageData = e.data.imageData;
+        console.log(e.data);
+        updateCanvas(imageData.data, arts[e.data.id].f, e.data.size);
+        postMessage({
+            type: 'art',
+            imageData: imageData,
+            id: e.data.id
+        });
+    }
+});
+
+// Generate a copy-able version of the arts array
+var prettifyCode = function(code) {
+        return code.replace(/this\./g, "")
+                   .replace(/\s+/g, " ")
+                   .replace(/(C\d+)/g, "<span class='constant'>$1<\/span>")
+                   .replace(/([;{]) /g, "$1<br>&nbsp;&nbsp;&nbsp;&nbsp;");
+    }
+var textArts = [];
+var i;
+for (i = 0; i < arts.length; i++) {
+    textArts[i] = {
+            author: arts[i].author,
+            image: arts[i].image,
+            artlink: arts[i].artlink,
+            authorlink: arts[i].authorlink,
+            f: {}
+        };
+    for (var a in arts[i].f) {
+        if (arts[i].f.hasOwnProperty(a)) {
+            if (typeof arts[i].f[a] !== 'function') {
+                textArts[i].f[a] = arts[i].f[a];
+            } else {
+                textArts[i].f[a] = prettifyCode(arts[i].f[a].toString());
+            }
+        }
+    }
+}
+
+console.log(textArts);
+
+postMessage({
+    type: "artlist",
+    list: textArts
+});
+

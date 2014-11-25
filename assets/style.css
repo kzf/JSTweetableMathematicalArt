@@ -213,3 +213,86 @@ select {
 .controlButton.on:hover {
     background: rgb(240, 240, 240);
 }
+
+/* 
+ * LOADER  
+ */
+.loader {
+  position:absolute;
+  box-sizing:border-box;
+  width: 50px;
+  height: 50px;
+  top: 0 ;
+  right: 0 ;
+  bottom : 0 ;
+  left : 0 ;
+  opacity: 1;
+  margin : auto;
+  border-radius: 50px;
+  border-width: 1px;
+  border-color: rgba(240, 90, 60, 1);
+  border-style: solid;
+  -webkit-animation: spin 1s infinite linear;
+          animation: spin 1s infinite linear
+  /* 
+    If you will only be incrementing in steps add:
+  transition: border-width 0.2s linear;
+  */
+}
+
+.loader:before {
+  content: "";
+  display: block;
+  position: relative;
+  left: 0px;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+      -ms-transform: translateY(-50%);
+          transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  background: #FFB200;
+  border-radius: 10px;
+}
+
+.loader.loader-done {
+  -webkit-animation: fillBox 0.5s;
+          animation: fillBox 0.5s;
+  -webkit-animation-fill-mode: forwards;
+          animation-fill-mode: forwards;
+}
+
+.loader.loader-done:before {
+  -webkit-animation: vanish 0.2s;
+          animation: vanish 0.2s;
+  -webkit-animation-fill-mode: forwards;
+          animation-fill-mode: forwards;
+}
+
+@-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); transform: rotate(360deg); }
+}
+
+@keyframes spin {
+    0% { -webkit-transform: rotate(0deg); transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); transform: rotate(360deg); }
+}
+
+@-webkit-keyframes fillBox {
+  0% { opacity: 0.2; }
+  100% { opacity: 0;
+        width: 300px;
+        height: 300px;
+        border-width: 300px;
+        border-radius: 300px; }
+}
+
+@keyframes fillBox {
+  0% { opacity: 0.2; }
+  100% { opacity: 0;
+        width: 300px;
+        height: 300px;
+        border-width: 300px;
+        border-radius: 300px; }
+}

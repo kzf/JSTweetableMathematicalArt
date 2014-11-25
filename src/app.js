@@ -1,5 +1,3 @@
-//require("arts.js");
-
 var patterns = $("#patterns");
 var controls = $("#controls");
 var welcome = $("#welcome");
@@ -25,6 +23,13 @@ canvas.width = canvas_size;
 canvas.height = canvas_size;
 canvasContainer.text("")
                .append(canvas);
+// Create the loader
+var loader = $('<div>').addClass("loader").hide();
+canvasContainer.append(loader);
+
+function updateProgress(percent) {
+  loader.css("border-width", Math.max(1, Math.round(20*percent))+"px");
+}
 
 var ctx = canvas.getContext('2d');
 
@@ -71,21 +76,27 @@ $("#UWSbutton").click(function() {
 /*
  * Method for updating the canvas
  */
-var updateCanvas = function(f) {
-    var imageData = ctx.getImageData(0,0,canvas_size,canvas_size);
-    var data = imageData.data;
-    var step = 1024/canvas_size;
-    var i = 0;
-    for (var y = 0; y < 1024; y += step) {
-        for (var x = 0; x < 1024; x += step) {
-            data[i++] = f._red(x, y) >> 2;
-            data[i++] = f._green(x, y) >> 2;
-            data[i++] = f._blue(x, y) >> 2;
-            data[i++] = 255; // alpha
-        }
+var W = new Worker("src/drawArt.js");
+
+W.onmessage = function(e) {
+    if (e.data.type === 'artlist') {
+        loadArts(e.data.list);
+    } else if (e.data.type === 'art') {
+        ctx.putImageData(e.data.imageData, 0, 0);
+        current_art = e.data.id;
+        loader.addClass("loader-done");
+        if (controls.is(":visible"))
+            controls.hide("slide", {direction: 'right'}, 200, function() {
+                showControls(id);
+            });
+        else
+            showControls(id);
+    } else if (e.data.type === 'progress') {
+        updateProgress(e.data.percent);
     }
-    ctx.putImageData(imageData, 0, 0);
 }
+
+
 
 var sliderMax = function(val) {
     if (val <= 16) {
@@ -150,56 +161,50 @@ var showControls = function(id) {
     controls.show("slide", {direction: 'right'}, 200);
 }
 
-var displayArt = function(id) {
-    var art = arts[id];
-    updateCanvas(art.f);
-    current_art = arts[id];
-    if (controls.is(":visible"))
-        controls.hide("slide", {direction: 'right'}, 200, function() {
-            showControls(id);
-        });
-    else
-        showControls(id);
+var displayArt = function(arts, id) {
+    var imageData = ctx.getImageData(0,0,canvas_size,canvas_size);
+    W.postMessage({
+        type: 'job',
+        id: id,
+        imageData: imageData,
+        size: canvas_size
+    });
+    loader.removeClass("loader-done").show();
+    updateProgress(0);
 }
 
 /*
  * Show arts list in pane
  */
-var prettifyCode = function(code) {
-    return code.replace(/this\./g, "")
-               .replace(/\s+/g, " ")
-               .replace(/(C\d+)/g, "<span class='constant'>$1<\/span>")
-               .replace(/([;{]) /g, "$1<br>&nbsp;&nbsp;&nbsp;&nbsp;");
-}
-arts.forEach(function(art, id) {
-    // Store the default values of each constant
-    art.f.constants.forEach(function(c) {
-        art.f[c+"_default"] = art.f[c];
-    });
-    art.f._red = art.f.red;
-    art.f._green = art.f.green;
-    art.f._blue = art.f.blue;
-    art.code_red = prettifyCode(art.f.red.toString());
-    art.code_green = prettifyCode(art.f.green.toString());
-    art.code_blue = prettifyCode(art.f.blue.toString());
-    // Construct the div containing the art information
-    var artDiv = $(artTemplate(art));
-    patterns.append(artDiv);
-    artDiv.find(".code").hide();
-    artDiv.find(".pattern_image").click(function() {
-        // Hide welcome message
-        if (welcome.is(":visible")) welcome.slideUp();
-        // Restore defaults
+
+var loadArts = function(arts) {
+    arts.forEach(function(art, id) {
+        // Store the default values of each constant
         art.f.constants.forEach(function(c) {
-            art.f[c] = art.f[c+"_default"];
+            art.f[c+"_default"] = art.f[c];
         });
-        art.f._red = art.f.red;
-        art.f._green = art.f.green;
-        art.f._blue = art.f.blue;
-        // Mark this piece as selected
-        $(".pattern_selected").removeClass("pattern_selected").find(".code").slideUp();
-        artDiv.addClass("pattern_selected").find(".code").slideDown();
-        // Display this guy
-        displayArt(id);
+        art.code_red = art.f.red;
+        art.code_green = art.f.green;
+        art.code_blue = art.f.blue;
+        // Construct the div containing the art information
+        var artDiv = $(artTemplate(art));
+        patterns.append(artDiv);
+        artDiv.find(".code").hide();
+        artDiv.find(".pattern_image").click(function() {
+            // Hide welcome message
+            if (welcome.is(":visible")) welcome.slideUp();
+            // Restore defaults
+            art.f.constants.forEach(function(c) {
+                art.f[c] = art.f[c+"_default"];
+            });
+            art.f._red = art.f.red;
+            art.f._green = art.f.green;
+            art.f._blue = art.f.blue;
+            // Mark this piece as selected
+            $(".pattern_selected").removeClass("pattern_selected").find(".code").slideUp();
+            artDiv.addClass("pattern_selected").find(".code").slideDown();
+            // Display this guy
+            displayArt(arts, id);
+        });
     });
-});
+}
