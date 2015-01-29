@@ -3,7 +3,11 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
+    font-family: 'Lato', sans-serif;
+}
+
+a:hover {
+  text-decoration: none;
 }
 
 #patterns {
@@ -35,6 +39,7 @@ body {
 #canvasContainer {
     margin: 0 auto;
     margin-top: 30px;
+    position: relative;
 }
 
 #welcome {
@@ -70,7 +75,7 @@ canvas {
     padding: 3px;
 }
 .pattern:hover {
-    background: rgb(255, 210, 210);
+    background: #ffb200;
 }
 
 .pattern_image {
@@ -89,15 +94,15 @@ canvas {
 }
 
 .pattern_selected {
-    background: rgb(160, 160, 160);
+    background: #ffb200;
 }
 
 .code {
-    background: rgb(90, 90, 90);
+    background: #d04125;
 }
 
 .artlink {
-    background: rgb(160, 160, 160);
+    background: #f05a3c;
     padding: 4px 0px;
     display: block;
     text-align: center;
@@ -146,7 +151,7 @@ h3 {
 
 .paramname {
     font-weight: bold;
-    color: rgb(240,52,72);
+    color: #d04125;
 }
 
 .paramspinner {
@@ -188,6 +193,7 @@ select {
 
 .controlButton {
     padding: 5px;
+    color: #333;
     background: rgb(240, 240, 240);
     display: inline-block;
     border-radius: 5px;
@@ -203,6 +209,7 @@ select {
 .buttonLabel {
     font-weight: bold;
     display: inline-block; 
+    margin-bottom: 20px;
 }
 
 .controlButton:hover {
@@ -212,6 +219,21 @@ select {
 
 .controlButton.on:hover {
     background: rgb(240, 240, 240);
+}
+
+.warning {
+  padding: 15px;
+  border-radius: 15px;
+  background: #f05a3c;
+  color: #fff;
+}
+.worker-warning {
+  box-sizing:border-box;
+  width: 512px;
+  margin: 10px auto;
+}
+.webworkers .worker-warning {
+  display: none;
 }
 
 /* 
@@ -233,11 +255,8 @@ select {
   border-color: rgba(240, 90, 60, 1);
   border-style: solid;
   -webkit-animation: spin 1s infinite linear;
-          animation: spin 1s infinite linear
-  /* 
-    If you will only be incrementing in steps add:
-  transition: border-width 0.2s linear;
-  */
+          animation: spin 1s infinite linear;
+  pointer-events: none;
 }
 
 .loader:before {

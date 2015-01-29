@@ -276,25 +276,38 @@ var arts = [
       artlink: "http://codegolf.stackexchange.com/a/35739",
       authorlink: "http://codegolf.stackexchange.com/users/30166/manuel-kasten",
       f: {
-        
-        constants: [],
+        C1: 0,
+        C2: 0,
+        C3: 0,
+        C4: 4,
+        C5: 880,
+        C6: 2,
+        C7: 356888,
+        C8: 645411,
+        C9: 1023,
+        C10: 80,
+        C11: 800,
+        C12: 30,
+        C13: 7,
+        C14: 5,
+        constants: ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12', 'C13', 'C14'],
         red: function(i, j) {
-           var a=0,b=0,c,d,n=0;
-           while((c=a*a)+(d=b*b)<4&&n++<880)
-           {b=2*a*b+j*8e-9-.645411;a=c-d+i*8e-9+.356888;}
-           return 1023*pow((n-80)/800,3.);
+           var a=this.C1,b=this.C2,c,d,n=this.C3;
+           while((c=a*a)+(d=b*b)<this.C4&&n++<this.C5)
+           {b=this.C6*a*b+j*8e-9-this.C8/1000000;a=c-d+i*8e-9+this.C7/1000000;}
+           return this.C9*pow((n-this.C10)/this.C11,this.C12/10);
         },
         green: function(i, j) {
-           var a=0,b=0,c,d,n=0;
-           while((c=a*a)+(d=b*b)<4&&n++<880)
-           {b=2*a*b+j*8e-9-.645411;a=c-d+i*8e-9+.356888;}
-           return 1023*pow((n-80)/800,.7);
+           var a=this.C1,b=this.C2,c,d,n=this.C3;
+           while((c=a*a)+(d=b*b)<this.C4&&n++<this.C5)
+           {b=this.C6*a*b+j*8e-9-this.C8/1000000;a=c-d+i*8e-9+this.C7/1000000;}
+           return this.C9*pow((n-this.C10)/this.C11,this.C13/10);
         },
         blue: function(i, j) { 
-           var a=0,b=0,c,d,n=0;
-           while((c=a*a)+(d=b*b)<4&&n++<880)
-           {b=2*a*b+j*8e-9-.645411;a=c-d+i*8e-9+.356888;}
-           return 1023*pow((n-80)/800,.5);
+           var a=this.C1,b=this.C2,c,d,n=this.C3;
+           while((c=a*a)+(d=b*b)<this.C4&&n++<this.C5)
+           {b=this.C6*a*b+j*8e-9-this.C8/1000000;a=c-d+i*8e-9+this.C7/1000000;}
+           return this.C9*pow((n-this.C10)/this.C11,this.C14/10);
         }
         }
     },
@@ -327,6 +340,8 @@ var arts = [
  *
  **********************************/
 
+var lastF;
+
 var updateCanvas = function(data, f, canvas_size) {
     var step = 1024/canvas_size;
     var i = 0;
@@ -345,12 +360,41 @@ var updateCanvas = function(data, f, canvas_size) {
 }
 
 addEventListener("message", function(e) {
+    var imageData = e.data.imageData;
     if (e.data.type === 'job') {
-        var imageData = e.data.imageData;
-        console.log(e.data);
         updateCanvas(imageData.data, arts[e.data.id].f, e.data.size);
+        var constants = {};
+        arts[e.data.id].f.constants.forEach(function(c) {
+          constants[c] = arts[e.data.id].f[c];
+        });
+        lastF = arts[e.data.id].f;
         postMessage({
             type: 'art',
+            imageData: imageData,
+            id: e.data.id,
+            constants: constants
+        });
+    } else if (e.data.type === 'alter') {
+        var f = e.data.constants;
+        f.red = arts[e.data.id].f[e.data.colorRoutes.red];
+        f.blue = arts[e.data.id].f[e.data.colorRoutes.blue];
+        f.green = arts[e.data.id].f[e.data.colorRoutes.green];
+        for (var prop in arts[e.data.id].f) {
+          if (!f.hasOwnProperty(prop)) {
+            f[prop] = arts[e.data.id].f[prop];
+          }
+        }
+        lastF = f;
+        updateCanvas(imageData.data, f, e.data.size);
+        postMessage({
+            type: 'altered',
+            imageData: imageData,
+            id: e.data.id
+        });
+    } else if (e.data.type === 'resize' && typeof lastF !== 'undefined') {
+        updateCanvas(imageData.data, lastF, e.data.size);
+        postMessage({
+            type: 'altered',
             imageData: imageData,
             id: e.data.id
         });
@@ -385,7 +429,6 @@ for (i = 0; i < arts.length; i++) {
     }
 }
 
-console.log(textArts);
 
 postMessage({
     type: "artlist",

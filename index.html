@@ -1,7 +1,8 @@
 <!doctype html>
-<html>
+<html class="no-js">
     <head>
         <title>JS Tweetable Mathematical Art</title>
+        <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="assets/jquery-ui.css" />
         <link rel="stylesheet" href="assets/style.css" />
         <script src="lib/jquery.min.js"></script>
@@ -9,16 +10,21 @@
         <script src="lib/FileSaver.min.js"></script>
         <script src="lib/canvas-toBlob.js"></script>
         <script src="lib/handlebars-v2.0.0.js"></script>
+        <script src="lib/modernizr.custom.js"></script>
     </head>
     <body>
-        <div id="patterns">
-            
-        </div>
+        
         <div id="welcome">
             This is an interactive viewer for some of the <a href="http://codegolf.stackexchange.com/questions/35569/tweetable-mathematical-art">Tweetable Mathematical Art</a> posted in the thread in the StackExchange <a href="http://codegolf.stackexchange.com/">Code Golf</a> community. Select a pattern at the left to begin.
         </div>
+        <div class="warning worker-warning">
+            Sorry, but your browser does not support Web Workers! Try to view the page in a more modern browser to see the mathematical art in action!
+        </div>
         <div id="canvasContainer">
-            It looks like your browser has Javascript disabled. Please enable Javascript to view this demo!
+            It looks like your browser has Javascript disabled. Please enable Javascript to view the mathematical art!
+        </div>
+        <div id="patterns">
+            
         </div>
         <div id="controls">
             <div class="paramshelp">
@@ -54,6 +60,10 @@
                 Adjust each of the function constants here. Refer to the function code if it helps! Feel free to use the arrows or type in a value to go beyond where the slider will let you go - the slider will automatically adjust.
             </div>
         </div>
+        <script id="loader-template" type="text/x-handlebars-template">
+            <div class="loader">
+            </div>
+        </script>
         <script id="art-template" type="text/x-handlebars-template">
             <div class="pattern">
                 <div class="pattern_image" style="background: url({{image}});"></div>
@@ -96,11 +106,14 @@
             <div class="controlButton" id="export">
                 Export PNG
             </div>
-            <div class="buttonLabel">
-                Toggle image updating as you slide:
-            </div>
-            <div class="controlButton" id="UWSbutton">
-                Update While Sliding
+            <div class="warning">
+                <div class="buttonLabel">
+                    Toggle image updating as you slide:
+                </div>
+                <div class="controlButton" id="UWSbutton">
+                    Update While Sliding
+                </div>
+                WARNING: Use with caution, updating while sliding should only be used if the selected art can render almost immediately.
             </div>
         </script>
         <script src="src/app.js"></script>

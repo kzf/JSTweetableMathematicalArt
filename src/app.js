@@ -1,3 +1,4 @@
+// Cache jQuery versions of DOM elements
 var patterns = $("#patterns");
 var controls = $("#controls");
 var welcome = $("#welcome");
@@ -23,8 +24,9 @@ canvas.width = canvas_size;
 canvas.height = canvas_size;
 canvasContainer.text("")
                .append(canvas);
+
 // Create the loader
-var loader = $('<div>').addClass("loader").hide();
+var loader = $(Handlebars.compile($("#loader-template").html())()).hide();
 canvasContainer.append(loader);
 
 function updateProgress(percent) {
@@ -50,7 +52,16 @@ $("#export").click(function() {
 var resizeCanvas = function() {
     canvas.width = canvas_size;
     canvas.height = canvas_size;
-    if (current_art) updateCanvas(current_art.f);
+    if (current_art !== null) {
+        W.postMessage({
+            type: 'resize',
+            id: current_art,
+            imageData: ctx.getImageData(0,0,canvas_size,canvas_size),
+            size: canvas_size
+        });
+        loader.removeClass("loader-done").show();
+        updateProgress(0);
+    }
 }
 $("#resize256").click(function() {
     canvas_size = 256;
@@ -87,10 +98,13 @@ W.onmessage = function(e) {
         loader.addClass("loader-done");
         if (controls.is(":visible"))
             controls.hide("slide", {direction: 'right'}, 200, function() {
-                showControls(id);
+                showControls(e.data.id, e.data.constants);
             });
         else
-            showControls(id);
+            showControls(e.data.id, e.data.constants);
+    } else if (e.data.type === 'altered') {
+        ctx.putImageData(e.data.imageData, 0, 0);
+        loader.addClass("loader-done");
     } else if (e.data.type === 'progress') {
         updateProgress(e.data.percent);
     }
@@ -112,20 +126,29 @@ var sliderMax = function(val) {
     }
 }
 
-var showControls = function(id) {
+var showControls = function(id, constants) {
     controls.find(".param").remove(); // Clear param controls
-    arts[id].f.constants.forEach(function(c) {
+
+    var constantNames = [];
+    for (var c in constants) {
+        if (constants.hasOwnProperty(c)) {
+            constantNames.push(c);
+        }
+    }
+    var colorRoutes = {};
+
+    constantNames.forEach(function(c) {
         var param = $(paramTemplate({name: c}));
         var sliderChange = function() {
-            arts[id].f[c] = slider.slider("value");
+            constants[c] = slider.slider("value");
             spinner.spinner("value", slider.slider("value"));
-            updateCanvas(arts[id].f);
+            displayArt(id, constants, colorRoutes);
         }
         var slider = param.find(".slider").slider({
             range: "min",
-            max: sliderMax(arts[id].f[c]),
+            max: sliderMax(constants[c]),
             min: 0,
-            value: arts[id].f[c],
+            value: constants[c],
             change: sliderChange,
             slide: function() {
                 if (updateOnSlide) sliderChange();
@@ -138,38 +161,51 @@ var showControls = function(id) {
                 } else if (newval < slider.slider("option", "min")) {
                     slider.slider("option", "min", newval);
                 }
-                arts[id].f[c] = newval;
+                constants[c] = newval;
                 slider.slider({value: newval});
-                updateCanvas(arts[id].f);
+                displayArt(id, constants, colorRoutes);
             };
-        var spinner = param.find(".paramspinner").val(arts[id].f[c]).spinner({
+        var spinner = param.find(".paramspinner").val(constants[c]).spinner({
             change: spinnerChange,
             spin: spinnerChange
         });
         param.find(".ui-spinner-button").click(function(){ $(this).focus(); });
         controls.append(param);
     });
+    
     ['red', 'green', 'blue'].forEach(function(color, index) {
+        colorRoutes[color] = color;
         rgbRoutes[color][0].selectedIndex = index;
         rgbRoutes[color].selectmenu({
             change: function(e, val) {
-                arts[id].f["_"+color] = arts[id].f[val.item.value];
-                updateCanvas(arts[id].f);
+                colorRoutes[color] = val.item.value;
+                displayArt(id, constants, colorRoutes);
             }
         }).selectmenu('refresh');
     });
     controls.show("slide", {direction: 'right'}, 200);
 }
 
-var displayArt = function(arts, id) {
+var displayArt = function(id, constants, colorRoutes) {
     var imageData = ctx.getImageData(0,0,canvas_size,canvas_size);
-    W.postMessage({
-        type: 'job',
-        id: id,
-        imageData: imageData,
-        size: canvas_size
-    });
-    loader.removeClass("loader-done").show();
+    if (typeof constants === 'undefined') {
+        W.postMessage({
+            type: 'job',
+            id: id,
+            imageData: imageData,
+            size: canvas_size
+        });
+    } else {
+        W.postMessage({
+            type: 'alter',
+            id: id,
+            imageData: imageData,
+            size: canvas_size,
+            constants: constants,
+            colorRoutes: colorRoutes
+        });
+    }
+    if (!updateOnSlide) loader.removeClass("loader-done").show();
     updateProgress(0);
 }
 
@@ -204,7 +240,7 @@ var loadArts = function(arts) {
             $(".pattern_selected").removeClass("pattern_selected").find(".code").slideUp();
             artDiv.addClass("pattern_selected").find(".code").slideDown();
             // Display this guy
-            displayArt(arts, id);
+            displayArt(id);
         });
     });
 }
