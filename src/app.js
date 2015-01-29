@@ -36,6 +36,7 @@ function updateProgress(percent) {
 var ctx = canvas.getContext('2d');
 
 var current_art = null;
+var render_number = 0;
 
 
 var artTemplate = Handlebars.compile($("#art-template").html());
@@ -93,9 +94,10 @@ W.onmessage = function(e) {
     if (e.data.type === 'artlist') {
         loadArts(e.data.list);
     } else if (e.data.type === 'art') {
+        if (e.data.size !== canvas_size) return;
         ctx.putImageData(e.data.imageData, 0, 0);
         current_art = e.data.id;
-        loader.addClass("loader-done");
+        if (e.data.render_number === render_number) loader.addClass("loader-done");
         if (controls.is(":visible"))
             controls.hide("slide", {direction: 'right'}, 200, function() {
                 showControls(e.data.id, e.data.constants);
@@ -103,9 +105,11 @@ W.onmessage = function(e) {
         else
             showControls(e.data.id, e.data.constants);
     } else if (e.data.type === 'altered') {
+        if (e.data.size !== canvas_size) return;
         ctx.putImageData(e.data.imageData, 0, 0);
-        loader.addClass("loader-done");
+        if (e.data.render_number === render_number) loader.addClass("loader-done");
     } else if (e.data.type === 'progress') {
+        if (e.data.render_number !== render_number) return;
         updateProgress(e.data.percent);
     }
 }
@@ -155,16 +159,16 @@ var showControls = function(id, constants) {
             }
         });
         var spinnerChange = function() {
-                var newval = spinner.spinner("value");
-                if (newval > slider.slider("option", "max")) {
-                    slider.slider("option", "max", newval);
-                } else if (newval < slider.slider("option", "min")) {
-                    slider.slider("option", "min", newval);
-                }
-                constants[c] = newval;
-                slider.slider({value: newval});
-                displayArt(id, constants, colorRoutes);
-            };
+            var newval = spinner.spinner("value");
+            if (newval > slider.slider("option", "max")) {
+                slider.slider("option", "max", newval);
+            } else if (newval < slider.slider("option", "min")) {
+                slider.slider("option", "min", newval);
+            }
+            constants[c] = newval;
+            slider.slider({value: newval});
+            displayArt(id, constants, colorRoutes);
+        };
         var spinner = param.find(".paramspinner").val(constants[c]).spinner({
             change: spinnerChange,
             spin: spinnerChange
@@ -186,14 +190,21 @@ var showControls = function(id, constants) {
     controls.show("slide", {direction: 'right'}, 200);
 }
 
+var displayDelay = null;
 var displayArt = function(id, constants, colorRoutes) {
+    if (displayDelay !== null) return;
+    displayDelay = setTimeout(function() {
+        displayDelay = null;
+    }, 50);
     var imageData = ctx.getImageData(0,0,canvas_size,canvas_size);
+    render_number++;
     if (typeof constants === 'undefined') {
         W.postMessage({
             type: 'job',
             id: id,
             imageData: imageData,
-            size: canvas_size
+            size: canvas_size,
+            renderNumber: render_number
         });
     } else {
         W.postMessage({
@@ -202,10 +213,11 @@ var displayArt = function(id, constants, colorRoutes) {
             imageData: imageData,
             size: canvas_size,
             constants: constants,
-            colorRoutes: colorRoutes
+            colorRoutes: colorRoutes,
+            renderNumber: render_number
         });
     }
-    if (!updateOnSlide) loader.removeClass("loader-done").show();
+    loader.removeClass("loader-done").show();
     updateProgress(0);
 }
 
