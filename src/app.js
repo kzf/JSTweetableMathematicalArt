@@ -49,20 +49,22 @@ $("#export").click(function() {
         saveAs(blob, "MathematicalArt.png");
     });
 });
+
 var resizeCanvas = function() {
     canvas.width = canvas_size;
     canvas.height = canvas_size;
     if (current_art !== null) {
+        loader.removeClass("loader-done").show();
+        updateProgress(0);
         W.postMessage({
             type: 'resize',
             id: current_art,
             imageData: ctx.getImageData(0,0,canvas_size,canvas_size),
             size: canvas_size
         });
-        loader.removeClass("loader-done").show();
-        updateProgress(0);
     }
 }
+
 $("#resize256").click(function() {
     canvas_size = 256;
     resizeCanvas();
