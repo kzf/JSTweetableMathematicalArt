@@ -342,7 +342,7 @@ var arts = [
 
 var lastF;
 
-var updateCanvas = function(data, f, canvas_size) {
+var updateCanvas = function(data, f, canvas_size, render_number) {
     var step = 1024/canvas_size;
     var i = 0;
     for (var y = 0; y < 1024; y += step) {
@@ -354,7 +354,8 @@ var updateCanvas = function(data, f, canvas_size) {
         }
         postMessage({
             type: "progress",
-            percent: y/1024
+            percent: y/1024,
+            render_number: render_number
         });
     }
 }
@@ -362,7 +363,7 @@ var updateCanvas = function(data, f, canvas_size) {
 addEventListener("message", function(e) {
     var imageData = e.data.imageData;
     if (e.data.type === 'job') {
-        updateCanvas(imageData.data, arts[e.data.id].f, e.data.size);
+        updateCanvas(imageData.data, arts[e.data.id].f, e.data.size, e.data.renderNumber);
         var constants = {};
         arts[e.data.id].f.constants.forEach(function(c) {
           constants[c] = arts[e.data.id].f[c];
@@ -372,7 +373,9 @@ addEventListener("message", function(e) {
             type: 'art',
             imageData: imageData,
             id: e.data.id,
-            constants: constants
+            constants: constants,
+            size: e.data.size,
+            render_number: e.data.renderNumber
         });
     } else if (e.data.type === 'alter') {
         var f = e.data.constants;
@@ -385,18 +388,22 @@ addEventListener("message", function(e) {
           }
         }
         lastF = f;
-        updateCanvas(imageData.data, f, e.data.size);
+        updateCanvas(imageData.data, f, e.data.size, e.data.renderNumber);
         postMessage({
             type: 'altered',
             imageData: imageData,
-            id: e.data.id
+            id: e.data.id,
+            size: e.data.size,
+            render_number: e.data.renderNumber
         });
     } else if (e.data.type === 'resize' && typeof lastF !== 'undefined') {
-        updateCanvas(imageData.data, lastF, e.data.size);
+        updateCanvas(imageData.data, lastF, e.data.size, e.data.renderNumber);
         postMessage({
             type: 'altered',
             imageData: imageData,
-            id: e.data.id
+            id: e.data.id,
+            size: e.data.size,
+            render_number: e.data.renderNumber
         });
     }
 });
